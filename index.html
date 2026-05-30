@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>타닥타닥 | 한글 타자연습</title>
+  <style>
+    /* =========================================================
+       1. 기본 색상과 공통 설정
+       ========================================================= */
+    :root {
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --surface-soft: #f1f1ef;
+      --text: #111111;
+      --muted: #777772;
+      --line: #ddddda;
+      --line-strong: #bdbdb8;
+      --danger: #df3d3d;
+      --success: #111111;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.07);
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --typing-size: 30px;
+      --typing-font: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    }
+
+    body.dark {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface-soft: #202020;
+      --text: #f5f5f2;
+      --muted: #a2a29d;
+      --line: #333330;
+      --line-strong: #575752;
+      --danger: #ff6969;
+      --success: #f5f5f2;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    button, textarea, select, input { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 24px 0 56px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 15px;
+      box-shadow: var(--shadow);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-button,
+    .secondary-button,
+    .primary-button,
+    .ghost-button {
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 0 16px;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .icon-button:hover,
+    .secondary-button:hover,
+    .primary-button:hover,
+    .ghost-button:hover { transform: translateY(-2px); }
+
+    .icon-button,
+    .secondary-button,
+    .ghost-button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .primary-button {
+      background: var(--text);
+      color: var(--bg);
+      font-weight: 800;
+    }
+
+    .ghost-button {
+      background: transparent;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; animation: fadeUp 0.35s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================================
+       2. 시작 화면
+       ========================================================= */
+    .hero {
+      min-height: 240px;
+      display: grid;
+      align-content: center;
+      gap: 18px;
+      padding: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 1.07;
+      letter-spacing: -3px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 640px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .section-title {
+      margin: 44px 0 16px;
+      font-size: 21px;
+      letter-spacing: -0.7px;
+    }
+
+    .mode-grid,
+    .text-grid,
+    .stats-grid,
+    .result-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .mode-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .mode-card,
+    .text-card,
+    .stat-card,
+    .result-card,
+    .selection-panel,
+    .typing-card,
+    .result-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .mode-card {
+      padding: 24px;
+      text-align: left;
+      color: var(--text);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .mode-number {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1.8px;
+    }
+
+    .mode-card h3 {
+      margin: 40px 0 8px;
+      font-size: 23px;
+      letter-spacing: -0.9px;
+    }
+
+    .mode-card p,
+    .text-card p,
+    .selection-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .selection-panel {
+      display: none;
+      margin-top: 22px;
+      padding: 24px;
+    }
+
+    .selection-panel.show { display: block; animation: fadeUp 0.3s ease; }
+
+    .selection-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .selection-head h3 { margin: 0 0 6px; }
+    .text-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .text-card {
+      padding: 18px;
+      color: var(--text);
+      text-align: left;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .text-card:hover,
+    .text-card.selected {
+      border-color: var(--text);
+      transform: translateY(-3px);
+    }
+
+    .text-card h4 { margin: 0 0 8px; font-size: 17px; }
+    .text-meta { margin-top: 14px; color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .selection-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .home-summary {
+      margin-top: 38px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* =========================================================
+       3. 연습 화면과 실시간 통계
+       ========================================================= */
+    .practice-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .practice-head h2 { margin: 0; letter-spacing: -1px; }
+    .practice-subtitle { margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .practice-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .stat-card { padding: 15px 16px; }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .stat-value { margin-top: 7px; font-size: 25px; font-weight: 900; letter-spacing: -0.8px; }
+    .stat-unit { margin-left: 2px; color: var(--muted); font-size: 12px; }
+
+    .typing-card {
+      position: relative;
+      min-height: 390px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .progress-track {
+      height: 4px;
+      background: var(--surface-soft);
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--text);
+      transition: width 0.16s ease;
+    }
+
+    .typing-content { padding: 30px; }
+
+    .prompt-label,
+    .input-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+    }
+
+    .prompt-text {
+      max-height: 245px;
+      overflow-y: auto;
+      margin-top: 16px;
+      padding-right: 4px;
+      font-family: var(--typing-font);
+      font-size: var(--typing-size);
+      line-height: 1.78;
+      letter-spacing: -0.7px;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+
+    .prompt-char { color: var(--muted); transition: color 0.08s ease, background 0.08s ease; }
+    .prompt-char.correct { color: var(--text); }
+    .prompt-char.wrong { color: var(--danger); }
+    .prompt-char.current {
+      color: var(--text);
+      background: var(--surface-soft);
+      border-radius: 5px;
+      box-shadow: inset 0 -2px 0 var(--text);
+    }
+
+    .input-zone {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .input-shell {
+      position: relative;
+      min-height: 80px;
+      margin-top: 10px;
+      border-radius: var(--radius-md);
+      background: var(--surface-soft);
+    }
+
+    .typed-mirror,
+    .typing-input {
+      width: 100%;
+      min-height: 80px;
+      margin: 0;
+      padding: 16px;
+      border: 0;
+      outline: 0;
+      resize: none;
+      overflow: auto;
+      background: transparent;
+      font-family: var(--typing-font);
+      font-size: calc(var(--typing-size) * 0.78);
+      line-height: 1.65;
+      letter-spacing: -0.45px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .typed-mirror {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .typing-input {
+      position: relative;
+      color: transparent;
+      caret-color: var(--text);
+      -webkit-text-fill-color: transparent;
+    }
+
+    .typed-placeholder { color: var(--muted); }
+    .typed-correct { color: var(--text); }
+    .typed-wrong { color: var(--danger); text-decoration: underline; text-decoration-thickness: 2px; }
+
+    .practice-tip {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* =========================================================
+       4. 결과 화면
+       ========================================================= */
+    .result-panel {
+      padding: 34px;
+      box-shadow: var(--shadow);
+    }
+
+    .result-kicker { color: var(--muted); font-size: 12px; font-weight: 900; letter-spacing: 1.7px; }
+    .result-panel h2 { margin: 10px 0 0; font-size: clamp(34px, 5vw, 58px); letter-spacing: -2.8px; }
+    .result-panel > p { margin: 10px 0 0; color: var(--muted); line-height: 1.7; }
+
+    .result-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 28px;
+    }
+
+    .result-card { padding: 18px; }
+    .result-card .label { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .result-card .value { margin-top: 8px; font-size: 27px; font-weight: 900; letter-spacing: -1px; }
+    .result-card .detail { margin-top: 7px; color: var(--muted); font-size: 12px; }
+
+    .change-up,
+    .change-down,
+    .change-flat { font-weight: 900; }
+    .change-up { color: #dd3737; }
+    .change-down { color: #3976d9; }
+    .change-flat { color: var(--muted); }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    /* =========================================================
+       5. 설정 모달
+       ========================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.48);
+    }
+
+    .modal-backdrop.show { display: grid; }
+
+    .modal {
+      width: min(520px, 100%);
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-head h3 { margin: 0; }
+    .setting-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 15px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .setting-row:first-of-type { border-top: 0; }
+    .setting-row label { font-weight: 800; }
+    .setting-row small { display: block; margin-top: 4px; color: var(--muted); font-weight: 500; }
+
+    .switch {
+      width: 52px;
+      height: 29px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: var(--line-strong);
+      transition: 0.2s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 21px;
+      height: 21px;
+      left: 4px;
+      top: 4px;
+      border-radius: 50%;
+      background: var(--surface);
+      transition: 0.2s;
+    }
+
+    .switch input:checked + .slider { background: var(--text); }
+    .switch input:checked + .slider::before { transform: translateX(23px); }
+
+    select,
+    input[type="range"] {
+      accent-color: var(--text);
+    }
+
+    select {
+      min-width: 160px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    /* =========================================================
+       6. 반응형 처리
+       ========================================================= */
+    @media (max-width: 860px) {
+      .mode-grid,
+      .text-grid { grid-template-columns: 1fr; }
+      .stats-grid,
+      .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { padding: 30px; }
+      .hero h1 { letter-spacing: -2px; }
+      .practice-head { align-items: flex-start; flex-direction: column; }
+      .practice-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 520px) {
+      .app-shell { width: min(100% - 22px, 1180px); padding-top: 16px; }
+      .topbar { margin-bottom: 18px; }
+      .hero { min-height: 220px; padding: 24px; }
+      .hero h1 { font-size: 40px; }
+      .hero p { font-size: 14px; }
+      .typing-content { padding: 20px; }
+      .prompt-text { font-size: calc(var(--typing-size) * 0.78); }
+      .typed-mirror,
+      .typing-input { font-size: calc(var(--typing-size) * 0.62); }
+      .result-panel { padding: 24px; }
+      .practice-tip { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <!-- 상단 메뉴 -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">ㄸ</div>
+        <span>타닥타닥</span>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="themeQuickButton" type="button" aria-label="테마 전환">◐ 테마</button>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="설정 열기">⚙ 설정</button>
+      </div>
+    </header>
+
+    <!-- =======================================================
+         시작 화면
+         ======================================================= -->
+    <section class="view active" id="homeView">
+      <div class="hero">
+        <p class="eyebrow">Korean Typing Practice</p>
+        <h1>매일 조금씩,<br />더 정확하고 빠르게.</h1>
+        <p>단문부터 장문, 5분 타자 검정까지. 복잡한 기능은 덜어내고 연습에 필요한 요소만 담았습니다.</p>
+      </div>
+
+      <h2 class="section-title">연습 모드를 선택하세요</h2>
+      <div class="mode-grid">
+        <button class="mode-card" type="button" data-mode="short">
+          <span class="mode-number">01 · SHORT</span>
+          <h3>단문 연습</h3>
+          <p>한 줄 문장을 차분히 입력하며 정확도와 리듬을 끌어올립니다.</p>
+        </button>
+        <button class="mode-card" type="button" data-mode="long">
+          <span class="mode-number">02 · LONG</span>
+          <h3>장문 연습</h3>
+          <p>원하는 글을 선택하고 긴 호흡으로 입력하며 집중력을 높입니다.</p>
+        </button>
+        <button class="mode-card" type="button" data-mode="test">
+          <span class="mode-number">03 · TEST</span>
+          <h3>타자 검정</h3>
+          <p>5분 동안 장문을 입력하고 현재 실력을 객관적으로 확인합니다.</p>
+        </button>
+      </div>
+
+      <!-- 장문 연습과 타자 검정에서만 열리는 글 선택 영역 -->
+      <div class="selection-panel" id="selectionPanel">
+        <div class="selection-head">
+          <div>
+            <h3 id="selectionTitle">연습할 글을 선택하세요</h3>
+            <p id="selectionDescription">긴 글 가운데 하나를 고르면 바로 연습을 시작할 수 있습니다.</p>
+          </div>
+        </div>
+        <div class="text-grid" id="textGrid"></div>
+        <div class="selection-actions">
+          <button class="ghost-button" id="cancelSelectionButton" type="button">취소</button>
+          <button class="primary-button" id="startSelectedButton" type="button">선택한 글로 시작</button>
+        </div>
+      </div>
+
+      <div class="home-summary">
+        <span id="homeBestText">최고 기록: 아직 기록이 없습니다.</span>
+        <span>기록은 현재 브라우저에만 저장됩니다.</span>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         타자 연습 화면
+         ======================================================= -->
+    <section class="view" id="practiceView">
+      <div class="practice-head">
+        <div>
+          <h2 id="practiceTitle">단문 연습</h2>
+          <div class="practice-subtitle" id="practiceSubtitle">첫 글자를 입력하면 타이머가 시작됩니다.</div>
+        </div>
+        <div class="practice-actions">
+          <button class="ghost-button" id="homeButton" type="button">← 시작화면</button>
+          <button class="secondary-button" id="newTextButton" type="button">새 문장</button>
+          <button class="primary-button" id="restartButton" type="button">다시 시작</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-label">현재 타수</div>
+          <div class="stat-value"><span id="speedStat">0</span><span class="stat-unit">타/분</span></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-label">정확도</div>
+          <div class="stat-value"><span id="accuracyStat">100.0</span><span class="stat-unit">%</span></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-label" id="timeLabel">경과 시간</div>
+          <div class="stat-value"><span id="timeStat">00:00</span></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-label">진행률</div>
+          <div class="stat-value"><span id="progressStat">0.0</span><span class="stat-unit">%</span></div>
+        </article>
+      </div>
+
+      <article class="typing-card">
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="typing-content">
+          <div class="prompt-label">Prompt</div>
+          <div class="prompt-text" id="promptText" aria-live="polite"></div>
+
+          <div class="input-zone">
+            <div class="input-label">Your typing</div>
+            <div class="input-shell" id="inputShell">
+              <div class="typed-mirror" id="typedMirror"></div>
+              <textarea
+                class="typing-input"
+                id="typingInput"
+                rows="2"
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                aria-label="타자 입력창"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="practice-tip">
+            <span>입력창을 클릭한 뒤 제시문을 따라 입력하세요. 붙여넣기는 사용할 수 없습니다.</span>
+            <span id="errorCountText">오타 0회</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- =======================================================
+         결과 화면
+         ======================================================= -->
+    <section class="view" id="resultView">
+      <article class="result-panel">
+        <div class="result-kicker">RESULT</div>
+        <h2 id="resultHeadline">연습 완료</h2>
+        <p id="resultDescription">한 번의 기록보다 꾸준한 반복이 더 중요합니다.</p>
+
+        <div class="result-grid">
+          <div class="result-card">
+            <div class="label">평균 타수</div>
+            <div class="value"><span id="resultSpeed">0</span><span class="stat-unit">타/분</span></div>
+            <div class="detail" id="changeRateText">이전 기록 없음</div>
+          </div>
+          <div class="result-card">
+            <div class="label">정확도</div>
+            <div class="value"><span id="resultAccuracy">100.0</span><span class="stat-unit">%</span></div>
+            <div class="detail" id="resultErrors">오타 0회</div>
+          </div>
+          <div class="result-card">
+            <div class="label">경과 시간</div>
+            <div class="value" id="resultTime">00:00</div>
+            <div class="detail" id="resultMode">단문 연습</div>
+          </div>
+          <div class="result-card">
+            <div class="label">최고 기록</div>
+            <div class="value"><span id="resultBest">0</span><span class="stat-unit">타/분</span></div>
+            <div class="detail" id="bestDetail">현재 브라우저 기준</div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="primary-button" id="retryButton" type="button">같은 글 다시 연습</button>
+          <button class="secondary-button" id="resultHomeButton" type="button">시작화면으로</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       설정 모달
+       ========================================================= -->
+  <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="settingsTitle">환경 설정</h3>
+        <button class="icon-button" id="closeSettingsButton" type="button" aria-label="설정 닫기">✕</button>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <label for="themeSwitch">어두운 테마</label>
+          <small>밝은 화면과 어두운 화면을 전환합니다.</small>
+        </div>
+        <label class="switch">
+          <input id="themeSwitch" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <label for="soundSwitch">타건음</label>
+          <small>키를 누를 때 소리를 재생합니다. 오타음도 함께 제어합니다.</small>
+        </div>
+        <label class="switch">
+          <input id="soundSwitch" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <label for="fontSizeRange">글자 크기</label>
+          <small id="fontSizeText">30px</small>
+        </div>
+        <input id="fontSizeRange" type="range" min="22" max="42" step="1" />
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <label for="fontSelect">폰트</label>
+          <small>운영체제에 설치된 기본 글꼴을 사용합니다.</small>
+        </div>
+        <select id="fontSelect">
+          <option value="sans">고딕체</option>
+          <option value="serif">명조체</option>
+          <option value="mono">고정폭 글꼴</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       1. 연습용 문장 데이터
+       - 저작권 문제를 피하기 위해 직접 작성한 문장과 글입니다.
+       ========================================================= */
+    const SHORT_SENTENCES = [
+      "조금 느려도 정확하게 입력하는 습관이 중요하다.",
+      "꾸준한 연습은 손끝의 망설임을 줄여 준다.",
+      "오늘의 기록은 내일의 출발점이 된다.",
+      "차분하게 호흡하고 문장을 끝까지 읽어 보자.",
+      "빠른 타자는 정확한 타자에서 시작한다.",
+      "익숙한 키보드도 매일 새로운 리듬을 만든다.",
+      "작은 집중이 모이면 긴 글도 편안하게 입력할 수 있다.",
+      "실수한 글자를 바로잡는 과정도 연습의 일부다.",
+      "한 글자씩 또박또박 입력하면 속도는 자연스럽게 따라온다.",
+      "급하게 누르기보다 일정한 박자를 유지해 보자."
+    ];
+
+    const LONG_TEXTS = [
+      {
+        id: "morning",
+        title: "아침의 리듬",
+        description: "차분한 하루의 시작을 담은 글",
+        text: "아침의 공기는 하루의 첫 문장을 닮아 있다. 아직 아무 말도 적히지 않은 종이처럼 조용하지만, 조금만 귀를 기울이면 다양한 소리가 천천히 모습을 드러낸다. 창문을 여는 소리, 물이 끓는 소리, 멀리서 지나가는 버스의 소리가 하나씩 이어진다. 바쁜 날일수록 잠시 멈춰 호흡을 고르면 좋다. 해야 할 일을 머릿속에서 한꺼번에 꺼내 놓기보다, 가장 먼저 할 수 있는 작은 일 하나를 고른다. 책상을 정리하거나 메모장을 펼치는 단순한 행동도 충분하다. 시작은 언제나 거창할 필요가 없다. 일정한 리듬으로 한 걸음씩 움직이면 복잡해 보이던 하루도 조금씩 정돈된다."
+      },
+      {
+        id: "walk",
+        title: "천천히 걷는 시간",
+        description: "도시를 걷는 동안 발견한 장면을 담은 글",
+        text: "평소보다 조금 느린 걸음으로 길을 걸으면 익숙한 거리에서도 새로운 장면을 만날 수 있다. 늘 지나치던 골목의 작은 화분, 가게 문을 열며 인사를 건네는 사람, 횡단보도 앞에서 잠시 멈춘 자전거가 눈에 들어온다. 도시의 풍경은 빠르게 움직일 때보다 천천히 바라볼 때 더 많은 이야기를 들려준다. 목적지에 도착하는 일만 중요하게 여기면 과정에서 마주치는 장면을 놓치기 쉽다. 때로는 효율보다 여유가 필요하다. 짧은 산책만으로도 생각이 정리되고, 풀리지 않던 고민의 실마리가 떠오르기도 한다. 천천히 걷는 시간은 멈춰 있는 시간이 아니다. 다음 걸음을 더 분명하게 내딛기 위해 마음의 속도를 조절하는 시간이다."
+      },
+      {
+        id: "practice",
+        title: "반복의 힘",
+        description: "작은 연습이 쌓이는 과정을 담은 글",
+        text: "처음부터 능숙한 사람은 드물다. 새로운 일을 시작하면 손은 자주 멈추고, 머릿속에서 알고 있던 내용도 쉽게 떠오르지 않는다. 그러나 같은 동작을 여러 번 반복하면 조금씩 변화가 생긴다. 전에는 어렵게 느껴지던 과정이 자연스러워지고, 실수한 뒤 다시 돌아오는 시간도 짧아진다. 중요한 점은 완벽한 하루를 만드는 일이 아니다. 짧더라도 꾸준히 이어 가는 태도가 더 큰 차이를 만든다. 기록은 다른 사람과 비교하기 위한 숫자만은 아니다. 어제보다 나아진 부분을 확인하고, 부족한 지점을 발견하는 도구다. 매일 작은 목표를 세우고 직접 확인해 보자. 반복은 지루한 과정처럼 보이지만, 어느 순간 자신감을 만드는 가장 단단한 기반이 된다."
+      }
+    ];
+
+    /* =========================================================
+       2. HTML 요소 연결
+       ========================================================= */
+    const views = {
+      home: document.getElementById("homeView"),
+      practice: document.getElementById("practiceView"),
+      result: document.getElementById("resultView")
+    };
+
+    const typingInput = document.getElementById("typingInput");
+    const typedMirror = document.getElementById("typedMirror");
+    const promptText = document.getElementById("promptText");
+    const progressBar = document.getElementById("progressBar");
+    const speedStat = document.getElementById("speedStat");
+    const accuracyStat = document.getElementById("accuracyStat");
+    const timeStat = document.getElementById("timeStat");
+    const progressStat = document.getElementById("progressStat");
+    const errorCountText = document.getElementById("errorCountText");
+    const timeLabel = document.getElementById("timeLabel");
+    const practiceTitle = document.getElementById("practiceTitle");
+    const practiceSubtitle = document.getElementById("practiceSubtitle");
+    const selectionPanel = document.getElementById("selectionPanel");
+    const textGrid = document.getElementById("textGrid");
+    const settingsModal = document.getElementById("settingsModal");
+
+    /* =========================================================
+       3. 앱 상태와 브라우저 저장소
+       ========================================================= */
+    const DEFAULT_SETTINGS = {
+      theme: "light",
+      sound: true,
+      fontSize: 30,
+      font: "sans"
+    };
+
+    const state = {
+      mode: "short",
+      selectedLongId: LONG_TEXTS[0].id,
+      currentText: "",
+      currentTitle: "",
+      startedAt: null,
+      timerId: null,
+      running: false,
+      finished: false,
+      isComposing: false,
+      committedValue: "",
+      attemptJamo: 0,
+      errorJamo: 0,
+      errorCount: 0,
+      finalElapsedSeconds: 0,
+      settings: loadJSON("tadatSettings", DEFAULT_SETTINGS),
+      records: loadJSON("tadatRecords", [])
+    };
+
+    function loadJSON(key, fallback) {
+      try {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : structuredClone(fallback);
+      } catch (error) {
+        console.warn(`${key} 불러오기 실패`, error);
+        return structuredClone(fallback);
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem("tadatSettings", JSON.stringify(state.settings));
+    }
+
+    function saveRecords() {
+      localStorage.setItem("tadatRecords", JSON.stringify(state.records.slice(0, 100)));
+    }
+
+    /* =========================================================
+       4. 한글 자소 단위 타수 계산
+       - 완성형 한글을 초성, 중성, 종성으로 분해합니다.
+       - 복합 모음과 겹받침은 실제 입력에 가까운 자소 수로 계산합니다.
+       ========================================================= */
+    const INITIAL_WEIGHTS = [1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2];
+    const MEDIAL_WEIGHTS = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1];
+    const FINAL_WEIGHTS = [0, 1, 2, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1];
+
+    function countJamo(text) {
+      let total = 0;
+      for (const char of text) {
+        const code = char.charCodeAt(0);
+        if (code >= 0xac00 && code <= 0xd7a3) {
+          const offset = code - 0xac00;
+          const initial = Math.floor(offset / 588);
+          const medial = Math.floor((offset % 588) / 28);
+          const final = offset % 28;
+          total += INITIAL_WEIGHTS[initial] + MEDIAL_WEIGHTS[medial] + FINAL_WEIGHTS[final];
+        } else if (char === "\n") {
+          total += 1;
+        } else {
+          total += 1;
+        }
+      }
+      return total;
+    }
+
+    /* =========================================================
+       5. 화면 전환과 글 선택
+       ========================================================= */
+    function showView(name) {
+      Object.values(views).forEach(view => view.classList.remove("active"));
+      views[name].classList.add("active");
+    }
+
+    function pickRandomShort(exclude = "") {
+      const candidates = SHORT_SENTENCES.filter(sentence => sentence !== exclude);
+      return candidates[Math.floor(Math.random() * candidates.length)] || SHORT_SENTENCES[0];
+    }
+
+    function getSelectedLongText() {
+      return LONG_TEXTS.find(item => item.id === state.selectedLongId) || LONG_TEXTS[0];
+    }
+
+    function renderTextSelection() {
+      textGrid.innerHTML = LONG_TEXTS.map(item => `
+        <button type="button" class="text-card ${item.id === state.selectedLongId ? "selected" : ""}" data-text-id="${item.id}">
+          <h4>${item.title}</h4>
+          <p>${item.description}</p>
+          <div class="text-meta">${item.text.length.toLocaleString()}자 · ${countJamo(item.text).toLocaleString()}타</div>
+        </button>
+      `).join("");
+
+      textGrid.querySelectorAll(".text-card").forEach(button => {
+        button.addEventListener("click", () => {
+          state.selectedLongId = button.dataset.textId;
+          renderTextSelection();
+        });
+      });
+    }
+
+    function prepareSelection(mode) {
+      state.mode = mode;
+      selectionPanel.classList.add("show");
+      document.getElementById("selectionTitle").textContent = mode === "test" ? "타자 검정에 사용할 글을 선택하세요" : "연습할 글을 선택하세요";
+      document.getElementById("selectionDescription").textContent = mode === "test"
+        ? "선택한 글을 5분 동안 입력합니다. 시간이 끝나면 자동으로 결과가 표시됩니다."
+        : "원하는 글을 선택하면 시간 제한 없이 장문 연습을 시작합니다.";
+      renderTextSelection();
+      selectionPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function startMode(mode, textItem = null) {
+      state.mode = mode;
+      if (mode === "short") {
+        state.currentText = pickRandomShort(state.currentText);
+        state.currentTitle = "오늘의 단문";
+      } else {
+        const chosen = textItem || getSelectedLongText();
+        state.currentText = chosen.text;
+        state.currentTitle = chosen.title;
+      }
+      resetPracticeState();
+      showView("practice");
+      renderPractice();
+      requestAnimationFrame(() => typingInput.focus());
+    }
+
+    /* =========================================================
+       6. 연습 시작, 초기화, 타이머
+       ========================================================= */
+    function resetPracticeState() {
+      clearInterval(state.timerId);
+      state.startedAt = null;
+      state.timerId = null;
+      state.running = false;
+      state.finished = false;
+      state.isComposing = false;
+      state.committedValue = "";
+      state.attemptJamo = 0;
+      state.errorJamo = 0;
+      state.errorCount = 0;
+      state.finalElapsedSeconds = 0;
+      typingInput.value = "";
+      typingInput.disabled = false;
+      typingInput.maxLength = state.currentText.length;
+    }
+
+    function startTimerIfNeeded() {
+      if (state.running || state.finished) return;
+      state.startedAt = Date.now();
+      state.running = true;
+      state.timerId = setInterval(() => {
+        updateStatistics();
+        if (state.mode === "test" && getElapsedSeconds() >= 300) {
+          finishPractice("time");
+        }
+      }, 100);
+    }
+
+    function getElapsedSeconds() {
+      if (state.finished) return state.finalElapsedSeconds;
+      if (!state.startedAt) return 0;
+      return Math.max(0, (Date.now() - state.startedAt) / 1000);
+    }
+
+    function formatTime(seconds) {
+      const safeSeconds = Math.max(0, Math.floor(seconds));
+      const minutes = String(Math.floor(safeSeconds / 60)).padStart(2, "0");
+      const secs = String(safeSeconds % 60).padStart(2, "0");
+      return `${minutes}:${secs}`;
+    }
+
+    /* =========================================================
+       7. 입력 비교와 한글 IME 처리
+       - 조합 중에는 오타로 확정하지 않습니다.
+       - 조합이 끝난 뒤 새로 확정된 글자만 판정합니다.
+       ========================================================= */
+    function findCommonPrefixLength(a, b) {
+      const max = Math.min(a.length, b.length);
+      let index = 0;
+      while (index < max && a[index] === b[index]) index += 1;
+      return index;
+    }
+
+    function processCommittedValue(nextValue) {
+      if (state.finished) return;
+      const previous = state.committedValue;
+      const prefixLength = findCommonPrefixLength(previous, nextValue);
+      const addedPart = nextValue.slice(prefixLength);
+
+      // 삭제만 발생한 경우에는 새로운 입력으로 계산하지 않습니다.
+      if (addedPart.length > 0) {
+        [...addedPart].forEach((char, offset) => {
+          const targetIndex = prefixLength + offset;
+          const targetChar = state.currentText[targetIndex];
+          const typedJamo = countJamo(char);
+          state.attemptJamo += typedJamo;
+          if (char !== targetChar) {
+            state.errorJamo += typedJamo;
+            state.errorCount += 1;
+            playErrorSound();
+          }
+        });
+      }
+
+      state.committedValue = nextValue;
+      updateStatistics();
+
+      if (nextValue === state.currentText) {
+        finishPractice("complete");
+      }
+    }
+
+    typingInput.addEventListener("compositionstart", () => {
+      state.isComposing = true;
+    });
+
+    typingInput.addEventListener("compositionend", () => {
+      state.isComposing = false;
+      processCommittedValue(typingInput.value);
+      renderPractice();
+    });
+
+    typingInput.addEventListener("input", () => {
+      if (typingInput.value.length > state.currentText.length) {
+        typingInput.value = typingInput.value.slice(0, state.currentText.length);
+      }
+      if (typingInput.value.length > 0) startTimerIfNeeded();
+      if (!state.isComposing) processCommittedValue(typingInput.value);
+      renderPractice();
+    });
+
+    typingInput.addEventListener("paste", event => {
+      event.preventDefault();
+    });
+
+    typingInput.addEventListener("drop", event => {
+      event.preventDefault();
+    });
+
+    typingInput.addEventListener("keydown", event => {
+      if (["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"].includes(event.key)) return;
+      playTypingSound();
+    });
+
+    /* =========================================================
+       8. 화면 렌더링과 실시간 통계 계산
+       ========================================================= */
+    function calculateAccuracy() {
+      if (state.attemptJamo === 0) return 100;
+      return Math.max(0, ((state.attemptJamo - state.errorJamo) / state.attemptJamo) * 100);
+    }
+
+    function calculateSpeed() {
+      const elapsed = getElapsedSeconds();
+      if (elapsed <= 0) return 0;
+      return Math.round((countJamo(typingInput.value) * 60) / elapsed);
+    }
+
+    function calculateProgress() {
+      if (!state.currentText.length) return 0;
+      return Math.min(100, (typingInput.value.length / state.currentText.length) * 100);
+    }
+
+    function updateStatistics() {
+      const elapsed = getElapsedSeconds();
+      const speed = calculateSpeed();
+      const accuracy = calculateAccuracy();
+      const progress = calculateProgress();
+      const shownTime = state.mode === "test" ? Math.max(0, 300 - elapsed) : elapsed;
+
+      speedStat.textContent = speed.toLocaleString();
+      accuracyStat.textContent = accuracy.toFixed(1);
+      timeStat.textContent = formatTime(shownTime);
+      progressStat.textContent = progress.toFixed(1);
+      progressBar.style.width = `${progress}%`;
+      errorCountText.textContent = `오타 ${state.errorCount.toLocaleString()}회`;
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderPrompt() {
+      const typed = typingInput.value;
+      promptText.innerHTML = [...state.currentText].map((char, index) => {
+        let className = "prompt-char";
+        if (index < typed.length) className += typed[index] === char ? " correct" : " wrong";
+        else if (index === typed.length) className += " current";
+        return `<span class="${className}">${char === "\n" ? "<br>" : escapeHtml(char)}</span>`;
+      }).join("");
+    }
+
+    function renderTypedMirror() {
+      const typed = typingInput.value;
+      if (!typed) {
+        typedMirror.innerHTML = '<span class="typed-placeholder">여기에 입력하세요.</span>';
+        return;
+      }
+      typedMirror.innerHTML = [...typed].map((char, index) => {
+        const className = char === state.currentText[index] ? "typed-correct" : "typed-wrong";
+        return `<span class="${className}">${char === "\n" ? "<br>" : escapeHtml(char)}</span>`;
+      }).join("");
+      typedMirror.scrollTop = typingInput.scrollTop;
+    }
+
+    function renderPractice() {
+      const modeNames = { short: "단문 연습", long: "장문 연습", test: "타자 검정" };
+      practiceTitle.textContent = modeNames[state.mode];
+      practiceSubtitle.textContent = state.mode === "test"
+        ? `${state.currentTitle} · 제한 시간 5분 · 첫 글자를 입력하면 시작됩니다.`
+        : `${state.currentTitle} · 첫 글자를 입력하면 타이머가 시작됩니다.`;
+      timeLabel.textContent = state.mode === "test" ? "남은 시간" : "경과 시간";
+      document.getElementById("newTextButton").style.display = state.mode === "short" ? "inline-flex" : "none";
+      renderPrompt();
+      renderTypedMirror();
+      updateStatistics();
+    }
+
+    /* =========================================================
+       9. 결과 저장과 결과 화면
+       ========================================================= */
+    function getModeName(mode) {
+      return ({ short: "단문 연습", long: "장문 연습", test: "타자 검정" })[mode];
+    }
+
+    function getModeRecords(mode) {
+      return state.records.filter(record => record.mode === mode);
+    }
+
+    function finishPractice(reason) {
+      if (state.finished) return;
+      // finished 상태로 바꾸기 전에 실제 경과 시간을 먼저 확보합니다.
+      const elapsedBeforeFinish = getElapsedSeconds();
+      state.finished = true;
+      state.running = false;
+      clearInterval(state.timerId);
+      state.finalElapsedSeconds = state.mode === "test" && reason === "time"
+        ? 300
+        : Math.max(0.1, elapsedBeforeFinish);
+      typingInput.disabled = true;
+
+      const previousRecords = getModeRecords(state.mode);
+      const previousScore = previousRecords[0]?.speed ?? null;
+      const speed = calculateSpeed();
+      const accuracy = calculateAccuracy();
+      const record = {
+        mode: state.mode,
+        title: state.currentTitle,
+        speed,
+        accuracy: Number(accuracy.toFixed(1)),
+        elapsedSeconds: Number(state.finalElapsedSeconds.toFixed(1)),
+        errorCount: state.errorCount,
+        completed: reason === "complete",
+        createdAt: new Date().toISOString()
+      };
+
+      state.records.unshift(record);
+      saveRecords();
+      renderResult(record, previousScore, reason);
+      updateHomeBest();
+      showView("result");
+    }
+
+    function renderResult(record, previousScore, reason) {
+      const modeRecords = getModeRecords(record.mode);
+      const bestScore = Math.max(...modeRecords.map(item => item.speed), 0);
+      const changeRate = previousScore && previousScore > 0
+        ? ((record.speed - previousScore) / previousScore) * 100
+        : null;
+
+      document.getElementById("resultHeadline").textContent = reason === "time" ? "5분 검정 완료" : "연습 완료";
+      document.getElementById("resultDescription").textContent = reason === "time"
+        ? "제한 시간이 끝났습니다. 최고 기록보다 오늘의 흐름을 먼저 확인해 보세요."
+        : "문장을 끝까지 입력했습니다. 작은 반복이 다음 기록을 만듭니다.";
+      document.getElementById("resultSpeed").textContent = record.speed.toLocaleString();
+      document.getElementById("resultAccuracy").textContent = record.accuracy.toFixed(1);
+      document.getElementById("resultErrors").textContent = `오타 ${record.errorCount.toLocaleString()}회`;
+      document.getElementById("resultTime").textContent = formatTime(record.elapsedSeconds);
+      document.getElementById("resultMode").textContent = `${getModeName(record.mode)} · ${record.title}`;
+      document.getElementById("resultBest").textContent = bestScore.toLocaleString();
+      document.getElementById("bestDetail").textContent = bestScore === record.speed ? "현재 최고 기록입니다." : "현재 브라우저 기준 최고 기록";
+
+      const changeRateText = document.getElementById("changeRateText");
+      if (changeRate === null) {
+        changeRateText.className = "detail change-flat";
+        changeRateText.textContent = "신규 기록 · 비교할 이전 기록 없음";
+      } else if (changeRate > 0) {
+        changeRateText.className = "detail change-up";
+        changeRateText.textContent = `▲ ${changeRate.toFixed(1)}% · 이전 기록 대비 상승`;
+      } else if (changeRate < 0) {
+        changeRateText.className = "detail change-down";
+        changeRateText.textContent = `▼ ${Math.abs(changeRate).toFixed(1)}% · 이전 기록 대비 하락`;
+      } else {
+        changeRateText.className = "detail change-flat";
+        changeRateText.textContent = "— 0.0% · 이전 기록과 동일";
+      }
+    }
+
+    function updateHomeBest() {
+      const homeBestText = document.getElementById("homeBestText");
+      if (!state.records.length) {
+        homeBestText.textContent = "최고 기록: 아직 기록이 없습니다.";
+        return;
+      }
+      const best = Math.max(...state.records.map(record => record.speed));
+      homeBestText.textContent = `전체 최고 기록: ${best.toLocaleString()}타/분`;
+    }
+
+    /* =========================================================
+       10. 효과음
+       - 외부 음원 없이 Web Audio API로 짧은 소리를 만듭니다.
+       ========================================================= */
+    let audioContext = null;
+
+    function getAudioContext() {
+      if (!audioContext) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return null;
+        audioContext = new AudioContext();
+      }
+      return audioContext;
+    }
+
+    function playTone(frequency, duration, volume, type = "sine") {
+      if (!state.settings.sound) return;
+      const context = getAudioContext();
+      if (!context) return;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(volume, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + duration);
+    }
+
+    function playTypingSound() {
+      playTone(520, 0.035, 0.025, "square");
+    }
+
+    function playErrorSound() {
+      playTone(145, 0.13, 0.08, "sawtooth");
+    }
+
+    /* =========================================================
+       11. 설정 적용
+       ========================================================= */
+    const FONT_MAP = {
+      sans: '"Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif',
+      serif: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif',
+      mono: '"D2Coding", "Nanum Gothic Coding", "Consolas", monospace'
+    };
+
+    function applySettings() {
+      document.body.classList.toggle("dark", state.settings.theme === "dark");
+      document.documentElement.style.setProperty("--typing-size", `${state.settings.fontSize}px`);
+      document.documentElement.style.setProperty("--typing-font", FONT_MAP[state.settings.font] || FONT_MAP.sans);
+      document.getElementById("themeSwitch").checked = state.settings.theme === "dark";
+      document.getElementById("soundSwitch").checked = state.settings.sound;
+      document.getElementById("fontSizeRange").value = state.settings.fontSize;
+      document.getElementById("fontSizeText").textContent = `${state.settings.fontSize}px`;
+      document.getElementById("fontSelect").value = state.settings.font;
+      saveSettings();
+    }
+
+    /* =========================================================
+       12. 버튼 이벤트
+       ========================================================= */
+    document.querySelectorAll(".mode-card").forEach(button => {
+      button.addEventListener("click", () => {
+        const mode = button.dataset.mode;
+        if (mode === "short") {
+          selectionPanel.classList.remove("show");
+          startMode("short");
+        } else {
+          prepareSelection(mode);
+        }
+      });
+    });
+
+    document.getElementById("startSelectedButton").addEventListener("click", () => {
+      startMode(state.mode, getSelectedLongText());
+    });
+
+    document.getElementById("cancelSelectionButton").addEventListener("click", () => {
+      selectionPanel.classList.remove("show");
+    });
+
+    document.getElementById("restartButton").addEventListener("click", () => {
+      resetPracticeState();
+      renderPractice();
+      typingInput.focus();
+    });
+
+    document.getElementById("newTextButton").addEventListener("click", () => {
+      startMode("short");
+    });
+
+    document.getElementById("homeButton").addEventListener("click", () => {
+      clearInterval(state.timerId);
+      showView("home");
+      updateHomeBest();
+    });
+
+    document.getElementById("retryButton").addEventListener("click", () => {
+      resetPracticeState();
+      showView("practice");
+      renderPractice();
+      typingInput.focus();
+    });
+
+    document.getElementById("resultHomeButton").addEventListener("click", () => {
+      showView("home");
+      updateHomeBest();
+    });
+
+    document.getElementById("settingsButton").addEventListener("click", () => {
+      settingsModal.classList.add("show");
+    });
+
+    document.getElementById("closeSettingsButton").addEventListener("click", () => {
+      settingsModal.classList.remove("show");
+    });
+
+    settingsModal.addEventListener("click", event => {
+      if (event.target === settingsModal) settingsModal.classList.remove("show");
+    });
+
+    document.getElementById("themeQuickButton").addEventListener("click", () => {
+      state.settings.theme = state.settings.theme === "dark" ? "light" : "dark";
+      applySettings();
+    });
+
+    document.getElementById("themeSwitch").addEventListener("change", event => {
+      state.settings.theme = event.target.checked ? "dark" : "light";
+      applySettings();
+    });
+
+    document.getElementById("soundSwitch").addEventListener("change", event => {
+      state.settings.sound = event.target.checked;
+      applySettings();
+    });
+
+    document.getElementById("fontSizeRange").addEventListener("input", event => {
+      state.settings.fontSize = Number(event.target.value);
+      applySettings();
+    });
+
+    document.getElementById("fontSelect").addEventListener("change", event => {
+      state.settings.font = event.target.value;
+      applySettings();
+    });
+
+    /* =========================================================
+       13. 최초 실행
+       ========================================================= */
+    applySettings();
+    updateHomeBest();
+    renderTextSelection();
+  </script>
+</body>
+</html>
